@@ -47,7 +47,7 @@ jobs:
       - name: Pre-seed GNU-mirror sources (bypass flaky ftpmirror.gnu.org)
         working-directory: AmberELEC
         run: |
-          set -uo pipefail
+          set -o pipefail
           mkdir -p sources
           grep -rl 'ftpmirror\.gnu\.org' packages/devel --include=package.mk | while read -r pkgmk; do
             (

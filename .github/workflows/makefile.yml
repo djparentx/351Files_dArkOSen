@@ -1,0 +1,202 @@
+name: Build 351Files
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout 351Files
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          set -e
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="$(git describe --tags --always --dirty)"
+          fi
+
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "Building version: ${VERSION}"
+
+      - name: Free disk space
+        shell: bash
+        run: |
+          set -e
+
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache
+
+          df -h
+
+      - name: Checkout 351ELEC build system
+        shell: bash
+        run: |
+          set -e
+
+          git clone --depth 1 https://github.com/351build/351ELEC.git "$GITHUB_WORKSPACE/351ELEC"
+
+      - name: Build RK3326 toolchain
+        shell: bash
+        working-directory: ${{ github.workspace }}/351ELEC
+        run: |
+          set -e
+
+          make docker-image-pull
+          make DOCKER_WORK_DIR=/work docker-toolchain-RK3326
+
+      - name: Locate AArch64 toolchain
+        shell: bash
+        working-directory: ${{ github.workspace }}/351ELEC
+        run: |
+          set -e
+
+          TOOLCHAIN="$(find "$PWD"/build.* -type f \
+            -name 'aarch64-libreelec-linux-gnueabi-g++' \
+            -print -quit)"
+
+          if [[ -z "$TOOLCHAIN" ]]; then
+            echo "ERROR: AArch64 compiler was not generated."
+            find "$PWD"/build.* -maxdepth 4 -type f \
+              -name '*libreelec*linux*gnueabi*g++' -print || true
+            exit 1
+          fi
+
+          TOOLCHAIN_DIR="$(dirname "$(dirname "$TOOLCHAIN")")"
+
+          echo "TOOLCHAIN_DIR=${TOOLCHAIN_DIR}" >> "$GITHUB_ENV"
+          echo "TOOLCHAIN=${TOOLCHAIN}" >> "$GITHUB_ENV"
+
+          SDL2_CONFIG="$(find "$TOOLCHAIN_DIR" -type f \
+            -path '*/sysroot/usr/bin/sdl2-config' \
+            -print -quit)"
+
+          if [[ -z "$SDL2_CONFIG" ]]; then
+            echo "ERROR: target sdl2-config was not generated."
+            exit 1
+          fi
+
+          echo "SDL2_CONFIG=${SDL2_CONFIG}" >> "$GITHUB_ENV"
+
+          STRIP="$(find "$TOOLCHAIN_DIR" -type f \
+            -name 'aarch64-libreelec-linux-gnueabi-strip' \
+            -print -quit)"
+
+          if [[ -z "$STRIP" ]]; then
+            echo "ERROR: AArch64 strip was not generated."
+            exit 1
+          fi
+
+          echo "STRIP=${STRIP}" >> "$GITHUB_ENV"
+
+          echo "Compiler:"
+          "$TOOLCHAIN" --version
+
+          echo "SDL2:"
+          "$SDL2_CONFIG" --version
+
+      - name: Build 351Files
+        shell: bash
+        run: |
+          set -e
+
+          rm -rf build
+          mkdir -p build
+
+          build351Files() {
+            DEVICE="$1"
+            FIRMWARE="$2"
+            START_PATH="$3"
+            RES_PATH="$4"
+
+            echo
+            echo "========================================"
+            echo "Building ${DEVICE} / ${FIRMWARE}"
+            echo "========================================"
+
+            make clean
+
+            make \
+              CC="${TOOLCHAIN}" \
+              DEVICE="${DEVICE}" \
+              SDL2_CONFIG="${SDL2_CONFIG}" \
+              START_PATH="${START_PATH}" \
+              RES_PATH="${RES_PATH}"
+
+            "${STRIP}" 351Files
+
+            mkdir -p "package/${DEVICE}_${FIRMWARE}/351Files"
+
+            cp -r \
+              351Files \
+              README.md \
+              res \
+              "package/${DEVICE}_${FIRMWARE}/351Files/"
+
+            cp \
+              "launchers/${FIRMWARE}/351Files.sh" \
+              "package/${DEVICE}_${FIRMWARE}/"
+
+            tar -C "package/${DEVICE}_${FIRMWARE}" \
+              -czf \
+              "build/351Files-${VERSION}_${DEVICE}_${FIRMWARE}.tgz" \
+              351Files.sh \
+              351Files
+
+            rm -rf "package/${DEVICE}_${FIRMWARE}"
+
+            echo "Created:"
+            ls -lh "build/351Files-${VERSION}_${DEVICE}_${FIRMWARE}.tgz"
+          }
+
+          build351Files RG351V 351ELEC /storage/roms ./res
+          build351Files RG351P 351ELEC /storage/roms ./res
+          build351Files RG351V ArkOS   /roms          ./res
+          build351Files RG351P ArkOS   /roms          ./res
+
+      - name: Verify artifacts
+        shell: bash
+        run: |
+          set -e
+
+          expected=(
+            "build/351Files-${VERSION}_RG351V_351ELEC.tgz"
+            "build/351Files-${VERSION}_RG351P_351ELEC.tgz"
+            "build/351Files-${VERSION}_RG351V_ArkOS.tgz"
+            "build/351Files-${VERSION}_RG351P_ArkOS.tgz"
+          )
+
+          for file in "${expected[@]}"; do
+            if [[ ! -f "$file" ]]; then
+              echo "ERROR: Missing artifact: $file"
+              exit 1
+            fi
+          done
+
+          echo
+          echo "All four artifacts exist:"
+          ls -lh build/*.tgz
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: 351Files-${{ env.VERSION }}
+          path: build/*.tgz
+          if-no-files-found: error
+          compression-level: 0

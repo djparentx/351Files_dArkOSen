@@ -44,6 +44,17 @@ jobs:
         run: |
           make docker-image-pull
 
+      - name: Pre-seed autoconf source (bypass flaky ftpmirror.gnu.org)
+        run: |
+          set -e
+          mkdir -p AmberELEC/sources/autoconf
+          curl -fL --retry 5 --retry-delay 5 \
+            -o AmberELEC/sources/autoconf/autoconf-2.71.tar.xz \
+            https://ftp.gnu.org/gnu/autoconf/autoconf-2.71.tar.xz
+          echo "f14c83cfebcc9427f2c3cea7258bd90df972d92eb26752da4ddad81c87a0faa4  AmberELEC/sources/autoconf/autoconf-2.71.tar.xz" | sha256sum -c -
+          echo "http://ftpmirror.gnu.org/autoconf/autoconf-2.71.tar.xz" > AmberELEC/sources/autoconf/autoconf-2.71.tar.xz.url
+          echo "f14c83cfebcc9427f2c3cea7258bd90df972d92eb26752da4ddad81c87a0faa4" > AmberELEC/sources/autoconf/autoconf-2.71.tar.xz.sha256
+
       - name: Build RK3326 toolchain
         working-directory: AmberELEC
         run: |

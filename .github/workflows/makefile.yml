@@ -57,7 +57,7 @@ jobs:
               case "$PKG_URL" in *ftpmirror.gnu.org*) ;; *) exit 0 ;; esac
 
               src_name="${PKG_URL##*/}"
-              mirror_url="${PKG_URL/ftpmirror.gnu.org/ftp.gnu.org}"
+              mirror_url="http://ftp.gnu.org/gnu${PKG_URL#http://ftpmirror.gnu.org}"
               dest_dir="sources/${PKG_NAME}"
               dest="${dest_dir}/${src_name}"
 

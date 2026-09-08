@@ -25,11 +25,12 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Building version: $VERSION"
 
-      - name: Install build dependencies
+      - name: Verify Docker
         run: |
-          sudo apt-get update
-          sudo apt-get install -y make docker.io
-
+          docker --version
+          docker info
+          make --version
+    
       - name: Checkout AmberELEC build system
         uses: actions/checkout@v4
         with:

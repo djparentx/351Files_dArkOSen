@@ -12,8 +12,6 @@
 
 // Parameters for RG351P
 #if defined(DEVICE_RG351P)
-   #define SCREEN_WIDTH             480
-   #define SCREEN_HEIGHT            320
    #define HARDWARE_ACCELERATION    0
    #define FULLSCREEN               1
    #define FONT_NAME                "NotoSans-Regular.ttf"
@@ -28,8 +26,6 @@
 
 // Parameters for RG351V
 #elif defined(DEVICE_RG351V)
-   #define SCREEN_WIDTH             640
-   #define SCREEN_HEIGHT            480
    #define HARDWARE_ACCELERATION    0
    #define FULLSCREEN               1
    #define FONT_NAME                "NotoSans-Regular.ttf"
@@ -44,8 +40,6 @@
 
 // Parameters for RG351MP
 #elif defined(DEVICE_RG351MP)
-   #define SCREEN_WIDTH             640
-   #define SCREEN_HEIGHT            480
    #define HARDWARE_ACCELERATION    0
    #define FULLSCREEN               1
    #define FONT_NAME                "NotoSans-Regular.ttf"
@@ -60,8 +54,6 @@
 
 // Parameters for RGB10
 #elif defined(DEVICE_RGB10)
-   #define SCREEN_WIDTH             480
-   #define SCREEN_HEIGHT            320
    #define HARDWARE_ACCELERATION    0
    #define FULLSCREEN               1
    #define FONT_NAME                "NotoSans-Regular.ttf"
@@ -76,8 +68,6 @@
 
 // Parameters for RK2020
 #elif defined(DEVICE_RK2020)
-   #define SCREEN_WIDTH             480
-   #define SCREEN_HEIGHT            320
    #define HARDWARE_ACCELERATION    0
    #define FULLSCREEN               1
    #define FONT_NAME                "NotoSans-Regular.ttf"
@@ -92,8 +82,6 @@
 
 // Parameters for CHI
 #elif defined(DEVICE_CHI)
-   #define SCREEN_WIDTH             640
-   #define SCREEN_HEIGHT            480
    #define HARDWARE_ACCELERATION    0
    #define FULLSCREEN               1
    #define FONT_NAME                "NotoSans-Regular.ttf"
@@ -108,8 +96,6 @@
 
 // Paramaters for desktop PC
 #else
-   #define SCREEN_WIDTH             640
-   #define SCREEN_HEIGHT            480
    #define HARDWARE_ACCELERATION    1
    #define FULLSCREEN               0
    #define FONT_NAME                "NotoSans-Regular.ttf"
@@ -122,6 +108,9 @@
    #define KEYBOARD_KEY_SPACING     4
    #define KEYBOARD_SYMBOL_SIZE     24
 #endif
+
+extern int g_screenWidth;
+extern int g_screenHeight;
 
 // Colors
 #define COLOR_TITLE_BG           68,  68,  68

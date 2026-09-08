@@ -45,12 +45,27 @@ bool SDLUtils::init()
       INHIBIT(std::cout << "SDL_JoystickOpen OK" << std::endl;)
    }
 
+   // Detect screen resolution at runtime
+   SDL_DisplayMode mode;
+   if (SDL_GetDesktopDisplayMode(0, &mode) == 0)
+   {
+      g_screenWidth = mode.w;
+      g_screenHeight = mode.h;
+   }
+   else
+   {
+      std::cerr << "Could not detect display mode! SDL_Error: " << SDL_GetError() << std::endl;
+      g_screenWidth = 640;
+      g_screenHeight = 480;
+   }
+
    // Create window
    #if FULLSCREEN == 1
-      g_window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+      g_window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, g_screenWidth, g_screenHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
    #else
-      g_window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+      g_window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, g_screenWidth, g_screenHeight, SDL_WINDOW_SHOWN);
    #endif
+   
    if (g_window == NULL)
    {
       std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;

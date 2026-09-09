@@ -61,6 +61,7 @@ jobs:
         working-directory: AmberELEC
         run: |
           set -o pipefail
+          set -x
           mkdir -p sources
           { grep -rl 'ftpmirror\.gnu\.org' packages/devel --include=package.mk; echo packages/devel/gmp/package.mk; } | while read -r pkgmk; do
             (

@@ -110,6 +110,16 @@ jobs:
 
           make docker-toolchain-RK3326
 
+      - name: Build SDL2 (target) for RK3326
+         working-directory: AmberELEC
+         run: |
+           set -e
+           export DEVICE=RK3326
+           export ARCH=aarch64
+           export PACKAGE=SDL2
+           export DOCKER_WORK_DIR=/work
+           make docker-package
+
       - name: Debug toolchain contents
         working-directory: AmberELEC
         run: |

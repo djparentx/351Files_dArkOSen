@@ -44,6 +44,19 @@ jobs:
         run: |
           make docker-image-pull
 
+      - name: Get AmberELEC commit
+        id: amberelec_sha
+        working-directory: AmberELEC
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache RK3326 toolchain
+        uses: actions/cache@v4
+        with:
+          path: AmberELEC/build.AmberELEC-RK3326.aarch64/toolchain
+          key: rk3326-toolchain-${{ steps.amberelec_sha.outputs.sha }}
+          restore-keys: |
+            rk3326-toolchain-
+
       - name: Pre-seed GNU-mirror sources (bypass flaky ftpmirror.gnu.org)
         working-directory: AmberELEC
         run: |
@@ -92,6 +105,11 @@ jobs:
           export DOCKER_WORK_DIR=/work
 
           make docker-toolchain-RK3326
+
+      - name: Debug toolchain contents
+        working-directory: AmberELEC
+        run: |
+          find build.AmberELEC-RK3326.aarch64/toolchain -maxdepth 3 | sort || echo "toolchain dir missing"
 
       - name: Verify toolchain
         working-directory: AmberELEC

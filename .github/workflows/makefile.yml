@@ -62,15 +62,19 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p sources
-          grep -rl 'ftpmirror\.gnu\.org' packages/devel --include=package.mk | while read -r pkgmk; do
+          { grep -rl 'ftpmirror\.gnu\.org' packages/devel --include=package.mk; echo packages/devel/gmp/package.mk; } | while read -r pkgmk; do
             (
               PKG_NAME=""; PKG_VERSION=""; PKG_SHA256=""; PKG_URL=""
               source "$pkgmk"
               [ -z "$PKG_URL" ] && exit 0
-              case "$PKG_URL" in *ftpmirror.gnu.org*) ;; *) exit 0 ;; esac
+              case "$PKG_URL" in *ftpmirror.gnu.org*|*gmplib.org*) ;; *) exit 0 ;; esac
 
               src_name="${PKG_URL##*/}"
-              mirror_url="http://ftp.gnu.org/gnu${PKG_URL#http://ftpmirror.gnu.org}"
+              case "$PKG_URL" in
+                *ftpmirror.gnu.org*) mirror_url="http://ftp.gnu.org/gnu${PKG_URL#http://ftpmirror.gnu.org}" ;;
+                *gmplib.org*)        mirror_url="http://ftp.gnu.org/gnu/gmp/${src_name}" ;;
+                *)                   mirror_url="$PKG_URL" ;;
+              esac
               dest_dir="sources/${PKG_NAME}"
               dest="${dest_dir}/${src_name}"
 

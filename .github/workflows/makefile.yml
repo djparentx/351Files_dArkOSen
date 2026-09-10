@@ -63,12 +63,12 @@ jobs:
           set -o pipefail
           set -x
           mkdir -p sources
-          { grep -rl 'ftpmirror\.gnu\.org' packages --include=package.mk; echo packages/devel/gmp/package.mk; } | while read -r pkgmk; do
+          { grep -rl 'ftpmirror\.gnu\.org' packages --include=package.mk; echo packages/devel/gmp/package.mk; echo packages/compress/zlib/package.mk; } | while read -r pkgmk; do
             (
               PKG_NAME=""; PKG_VERSION=""; PKG_SHA256=""; PKG_URL=""
               source "$pkgmk"
               [ -z "$PKG_URL" ] && exit 0
-              case "$PKG_URL" in *ftpmirror.gnu.org*|*gmplib.org*) ;; *) exit 0 ;; esac
+              case "$PKG_URL" in *ftpmirror.gnu.org*|*gmplib.org*|*zlib.net*) ;; *) exit 0 ;; esac
 
               src_name="${PKG_URL##*/}"
               case "$PKG_URL" in
@@ -80,6 +80,7 @@ jobs:
                   esac
                   ;;
                 *gmplib.org*) mirror_url="http://ftp.gnu.org/gnu/gmp/${src_name}" ;;
+                *zlib.net*)   mirror_url="https://github.com/madler/zlib/releases/download/v1.3/${src_name}" ;;
                 *)            mirror_url="$PKG_URL" ;;
               esac
               dest_dir="sources/${PKG_NAME}"

@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: AmberELEC/build.AmberELEC-RK3326.aarch64/toolchain
-          key: rk3326-toolchain-${{ steps.amberelec_sha.outputs.sha }}
+          key: rk3326-toolchain-v2-${{ steps.amberelec_sha.outputs.sha }}
           restore-keys: |
             rk3326-toolchain-
 

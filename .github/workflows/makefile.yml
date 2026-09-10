@@ -128,6 +128,25 @@ jobs:
           export DOCKER_WORK_DIR=/work
           make docker-package
 
+      - name: Debug jinja2/python3 failure
+        if: failure()
+        working-directory: AmberELEC
+        run: |
+          echo "=== meson-log.txt tail ==="
+          tail -100 build.AmberELEC-RK3326.aarch64/systemd-*/.*/meson-logs/meson-log.txt 2>/dev/null || echo "meson-log.txt not found"
+
+          echo "=== toolchain python3 ==="
+          TOOLCHAIN="$PWD/build.AmberELEC-RK3326.aarch64/toolchain"
+          "$TOOLCHAIN/bin/python3" --version 2>&1 || echo "no toolchain python3"
+          "$TOOLCHAIN/bin/python3" -c "import jinja2; print(jinja2.__file__)" 2>&1 || true
+          "$TOOLCHAIN/bin/python3" -c "import markupsafe; print(markupsafe.__file__)" 2>&1 || true
+
+          echo "=== which python3 in PATH ==="
+          which -a python3 2>&1 || true
+
+          echo "=== jinja2/markupsafe on disk ==="
+          find "$TOOLCHAIN" -iname "*jinja2*" -o -iname "*markupsafe*" 2>/dev/null | sort
+
       - name: Debug toolchain contents
         working-directory: AmberELEC
         run: |

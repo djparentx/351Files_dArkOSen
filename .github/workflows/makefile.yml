@@ -126,6 +126,7 @@ jobs:
           export ARCH=aarch64
           export PACKAGE=SDL2
           export DOCKER_WORK_DIR=/work
+          export LD_LIBRARY_PATH=/work/build.AmberELEC-RK3326.aarch64/toolchain/lib:${LD_LIBRARY_PATH}
           make docker-package
 
       - name: Debug jinja2/python3 failure

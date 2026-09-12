@@ -52,7 +52,9 @@ jobs:
           grep -H 'single-version-externally-managed' \
             packages/python/devel/Jinja2/package.mk \
             packages/python/devel/MarkupSafe/package.mk
-
+          sed -i 's|WGET_CMD="wget --output-file=-|WGET_CMD="wget -v --output-file=-|' scripts/get_archive
+          grep -H '^WGET_CMD=' scripts/get_archive
+          
       - name: Pull AmberELEC build container
         working-directory: AmberELEC
         run: |

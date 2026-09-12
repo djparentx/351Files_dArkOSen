@@ -1,0 +1,18 @@
+name: Diag pigz download
+on: workflow_dispatch
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout AmberELEC build system
+        uses: actions/checkout@v4
+        with:
+          repository: AmberELEC/AmberELEC
+          ref: dev
+          path: AmberELEC
+
+      - name: Diagnose download env inside build container
+        working-directory: AmberELEC
+        run: |
+          make docker-shell COMMAND="bash -c 'echo ---ENV---; env | grep -i proxy; echo ---LDD---; ldd \$\$(which wget); echo ---DOWNLOAD---; wget --no-check-certificate -O /tmp/pigz.tar.gz https://zlib.net/pigz/pigz-2.8.tar.gz && sha256sum /tmp/pigz.tar.gz'"

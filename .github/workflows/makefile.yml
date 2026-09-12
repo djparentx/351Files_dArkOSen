@@ -39,6 +39,17 @@ jobs:
           path: AmberELEC
           fetch-depth: 1
 
+      - name: Patch AmberELEC Jinja2/MarkupSafe host install (avoid legacy .egg)
+        working-directory: AmberELEC
+        run: |
+          set -e
+          sed -i 's|python3 setup.py install --prefix=${TOOLCHAIN}|python3 setup.py install --single-version-externally-managed --root=/ --prefix=${TOOLCHAIN}|' \
+            packages/python/devel/Jinja2/package.mk \
+            packages/python/devel/MarkupSafe/package.mk
+          grep -H 'single-version-externally-managed' \
+            packages/python/devel/Jinja2/package.mk \
+            packages/python/devel/MarkupSafe/package.mk
+
       - name: Pull AmberELEC build container
         working-directory: AmberELEC
         run: |

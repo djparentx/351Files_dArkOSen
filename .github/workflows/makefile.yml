@@ -115,6 +115,8 @@ jobs:
           set -e
 
           export DOCKER_WORK_DIR=/work
+          export PYTHON_EGG_CACHE="$PWD/.python-eggs"
+          mkdir -p "$PYTHON_EGG_CACHE"
 
           make docker-toolchain-RK3326
 

@@ -15,4 +15,4 @@ jobs:
       - name: Diagnose download env inside build container
         working-directory: AmberELEC
         run: |
-          make docker-shell COMMAND="bash -c 'echo ---ENV---; env | grep -i proxy; echo ---LDD---; ldd \$\$(which wget); echo ---DOWNLOAD---; wget --no-check-certificate -O /tmp/pigz.tar.gz https://zlib.net/pigz/pigz-2.8.tar.gz && sha256sum /tmp/pigz.tar.gz'"
+          make docker-shell COMMAND="stdbuf -oL -eL bash -c 'echo ---ENV---; env | grep -i proxy; echo ---LDD---; ldd \$\$(which wget); echo ---DOWNLOAD---; timeout 20 wget -v --no-check-certificate -O /tmp/pigz.tar.gz https://zlib.net/pigz/pigz-2.8.tar.gz; echo EXIT_CODE:\$\$?; sha256sum /tmp/pigz.tar.gz 2>&1'"

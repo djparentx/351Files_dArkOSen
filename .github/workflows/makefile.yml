@@ -39,6 +39,9 @@ jobs:
           path: AmberELEC
           fetch-depth: 1
 
+      - name: Alias /work to AmberELEC dir (matches container bind mount)
+        run: sudo ln -s "$GITHUB_WORKSPACE/AmberELEC" /work
+
       - name: Patch AmberELEC Jinja2/MarkupSafe host install (avoid legacy .egg)
         working-directory: AmberELEC
         run: |
